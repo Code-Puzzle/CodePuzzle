@@ -6,6 +6,8 @@ from cocos.actions import *
 
 from pyglet import gl
 
+# TODO: Подумать! Возможно, классы стоит убрать в отдельный файл, и добавить класс сцены?
+
 
 class DragDropStrings(cocos.layer.Layer):
     """
@@ -72,6 +74,8 @@ class RectWithText(cocos.layer.Layer):
     """ RectWithText - слой, который содержит строчку собираемого кода, и всё для работы с ней.
         Является обработчиком событий
     """
+    # TODO: запилить методы, которые буду управлять состояниями строки(находится/не находится в позиции и т д)
+
     is_event_handler = True
 
     def __init__(self, text, color, x, y):
@@ -120,21 +124,29 @@ class RectWithText(cocos.layer.Layer):
                 par.add(dragged, z=1)
                 # /hack
                 self.parent.dragged_line = self
-    """                          --------ТУТ Я ЗАКОНЧИЛ КОММЕНТИРОВАТЬ------                               """
+
     def on_mouse_release(self, x, y, buttons, modifiers):
-        """This function is called when any mouse button is pressed
-
-        (x, y) are the physical coordinates of the mouse
-        'buttons' is a bitwise or of pyglet.window.mouse constants LEFT, MIDDLE, RIGHT
-        'modifiers' is a bitwise or of pyglet.window.key modifier constants
-           (values like 'SHIFT', 'OPTION', 'ALT')
+        """ Обработчик события  - отпускание кнопки мыши
+        x, y - физические координаты курсора
+        buttons - нажатые кнопки. Опытным путем установлено: 1 - левая, 4 - правая, 2 - средняя
         """
-
-        if buttons == 1:
-            x, y = director.get_virtual_coordinates(x, y)
-            if self.is_dragged:
+        if buttons == 1:  # если нажата ЛКМ
+            x, y = director.get_virtual_coordinates(x, y)  # перевод из физических координат в виртуальные
+            if self.is_dragged:  # если строчку таскают
                 pos = self.parent.is_line_in_unoccupied_position(x, y)
-                if not pos:
+                if pos:  # проверяем, попали ли в незанятую позицию
+                    self.is_dragged = False
+                    self.do(MoveTo((pos.x, pos.y), 0.1))
+                    self.parent.dragged_line = self
+                    if self.in_position:  # если строка уже была в позиции, очищаем позицию
+                        self.in_position.is_occupied = False
+                        self.in_position.occupying_line = ""
+                        self.in_position = None
+                    pos.is_occupied = True
+                    pos.occupying_line = self.line
+                    self.in_position = pos
+                else:  # если не попала - возвращаем строку на исходную
+                    # TODO: сделать так, чтобы если строка была в какой-то позиции, она возвращалась на неё
                     self.is_dragged = False
                     self.do(MoveTo((self.startx, self.starty), 0.25))
                     self.parent.dragged_line = None
@@ -142,85 +154,87 @@ class RectWithText(cocos.layer.Layer):
                         self.in_position.is_occupied = False
                         self.in_position.occupying_line = ""
                         self.in_position = None
-                else:
-                    self.is_dragged = False
-                    self.do(MoveTo((pos.x, pos.y), 0.1))
-                    self.parent.dragged_line = self
-                    if self.in_position:
-                        self.in_position.is_occupied = False
-                        self.in_position.occupying_line = ""
-                        self.in_position = None
-                    pos.is_occupied = True
-                    pos.occupying_line = self.line
-                    self.in_position = pos
-        if self.parent.goal():
+        #  TODO: Заглушка! Возможно надо куда-нибудь это убрать - сделать обработчик события победы
+        if self.parent.goal():  # проверяем, не достигнута ли цель
             self.parent.winning_line.do(Show())
         else:
             self.parent.winning_line.do(Hide())
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-        if self.is_dragged:
+        """ Обработчик события  - таскание мышью
+            x, y - физические координаты курсора
+            buttons - нажатые кнопки. Опытным путем установлено: 1 - левая, 4 - правая, 2 - средняя
+        """
+        if self.is_dragged:  # если именно эту строчку таскают - таскаемся =)
             x, y = director.get_virtual_coordinates(x, y)
-            self.do(Place((x - self.w/2, y - self.h/2)))
+            self.do(Place((x - self.w/2, y - self.h/2)))  # за серединку
 
 
 class RectPosition(cocos.layer.Layer):
+    """ RectPosition - слой, который содержит позицию, в которой может находится строчка кода, и всё для работы с ней.
+        Является обработчиком событий
+    """
+    # TODO: запилить методы, которые буду управлять состояниями позиции (в неё попала строка, очистить позицию и т д)
 
     is_event_handler = True
 
     def __init__(self, x, y):
+        """ Конструктор """
         super(RectPosition, self).__init__()
 
-        self.is_occupied = False
-        # self.is_hovered = False
-        self.occupying_line = ""
+        self.is_occupied = False  # флаг занятости позиции
+        self.occupying_line = ""  # строка текста, если позиция занята. Из них собирается список для проверки
 
-        self.x = x
-        self.y = y
-        self.w = 250
-        self.h = 18
+        self.x = x  # x - координата
+        self.y = y  # y - координата
+        self.w = 250  # ширина позиции TODO: Хардкод! Сделать ширину равной самой длинной строке исходного кода
+        self.h = 18  # высота позиции TODO: Хардкод! Если будет меняться размер шрифта, нужно будет менять
 
-        self.rectangle = Rectangle((1, 0.2, 0.2, 1), 0, 0, self.w, self.h)
+        self.rectangle = Rectangle((1, 0.2, 0.2, 1), 0, 0, self.w, self.h)  # закрашений прямоугольник (Rectangle)
 
         self.add(self.rectangle)
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-        x, y = director.get_virtual_coordinates(x, y)
+        """ Обработчик события  - таскание мышью
+            x, y - физические координаты курсора
+            buttons - нажатые кнопки. Опытным путем установлено: 1 - левая, 4 - правая, 2 - средняя
+        """
+        x, y = director.get_virtual_coordinates(x, y)  # перевод из физических координат в виртуальные
         posx = self.x
         posy = self.y
         posx2 = self.x + self.w
         posy2 = self.y + self.h
+        # проверяем, попадает ли курсор в позицию, если да - изменяем цвет прямоугольника
         if (x >= posx) and (y >= posy) and (x <= posx2) and (y <= posy2) and not self.is_occupied:
-            self.rectangle.layer_color = (0.2, 1, 0.2, 1)
+            self.rectangle.layer_color = (0.2, 1, 0.2, 1)  # зелёненький
         else:
-            self.rectangle.layer_color = (1, 0.2, 0.2, 1)
+            self.rectangle.layer_color = (1, 0.2, 0.2, 1)  # красненький
 
     def on_mouse_release(self, x, y, buttons, modifiers):
-        """This function is called when any mouse button is pressed
-
-        (x, y) are the physical coordinates of the mouse
-        'buttons' is a bitwise or of pyglet.window.mouse constants LEFT, MIDDLE, RIGHT
-        'modifiers' is a bitwise or of pyglet.window.key modifier constants
-           (values like 'SHIFT', 'OPTION', 'ALT')
+        """ Обработчик события  - отпускание кнопки мыши
+        x, y - физические координаты курсора
+        buttons - нажатые кнопки. Опытным путем установлено: 1 - левая, 4 - правая, 2 - средняя
         """
-        self.rectangle.layer_color = (1, 0.2, 0.2, 1)
+        self.rectangle.layer_color = (1, 0.2, 0.2, 1)  # меняем цвет на красный в любом случае при отпускании мыши
+        # TODO: убрать функционал в метод заполнения/очищения позиции. Сделать, чтобы цвет менялся для заполненной
 
 
 class Rectangle(cocos.layer.Layer):
 
-    """Rectangle (color, x, y, w, h) : A layer drawing a rectangle at (x,y) of
-    given color and w, h"""
+    """Rectangle (color, x, y, w, h) : слой, который рисует прямоугольник в (x,y) нужного цвета, ширины и высоты"""
 
     def __init__(self, color, x, y, w, h):
+        """ Конструктор """
         super(Rectangle, self).__init__()
 
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-        self.layer_color = color
+        self.x = x  # x - координата
+        self.y = y  # y - координата
+        self.w = w  # высота прямоугольника
+        self.h = h  # ширина прямоугольника
+        self.layer_color = color  # цвет прямоугольника (в формате OpenGL - (R<от 0 до 1>,G,B,A - альфа)  )
 
     def draw(self):
+        """ Функция рисования прямоугольника, с использованием pyglet.gl """
         super(Rectangle, self).draw()
 
         gl.glColor4f(*self.layer_color)
@@ -235,10 +249,12 @@ class Rectangle(cocos.layer.Layer):
         gl.glEnd()
         gl.glColor4f(1, 1, 1, 1)
 
-code = [line.strip() for line in open("code.txt", 'r')]
+# Тут начинается выполнение программы
+# TODO: Заглушка! Тут будет запуск сцены с главным меню
+code = [line.strip() for line in open("code.txt", 'r')]  # загружаем код, который будет собирать игрок из файла
 
-director.init(width=1024, height=768, caption="Code Puzzle", fullscreen=False)
+director.init(width=1024, height=768, caption="Code Puzzle", fullscreen=False)  # инициализация окна игры
 
-sc = cocos.scene.Scene(DragDropStrings(code))
+sc = cocos.scene.Scene(DragDropStrings(code))  # сцена, состоящая из слоя DragDropStrings
 
-director.run(sc)
+director.run(sc)  # запускаем сцену
