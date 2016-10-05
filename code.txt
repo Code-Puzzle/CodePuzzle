@@ -1,4 +1,0 @@
-program hello_world
-begin
-write('Hello World!');
-end.

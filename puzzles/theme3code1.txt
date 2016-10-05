@@ -1,0 +1,14 @@
+program if5;
+var
+a, b, c, plus, minus: integer;
+begin
+write('Введите три целых числа: ');
+read(a, b, c);
+plus := 0;
+minus := 0;
+if a > 0 then Inc(plus) else Inc(minus);
+if b > 0 then Inc(plus) else Inc(minus);
+if c > 0 then Inc(plus) else Inc(minus);
+writeln('Количество положительных чисел - ', plus);
+writeln('Количество отрицательных чисел - ', minus);
+end.

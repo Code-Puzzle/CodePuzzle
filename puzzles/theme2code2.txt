@@ -1,0 +1,7 @@
+Program How_old_are_you;
+var years: integer;
+Begin
+Writeln('—колько вам лет?');
+Read(years);
+Write('¬ам ',years,' лет.'); 
+End.

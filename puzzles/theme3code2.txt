@@ -1,0 +1,10 @@
+program if30;
+var
+a: integer;
+begin
+write('Введите число: ');
+read(a);
+if Odd(a) then write('Нечетное ') else write('Четное ');
+if a >= 100 then write('трехзначное число') else
+if a < 10 then write('однозначное число') else write('двухзначное число');
+end.
