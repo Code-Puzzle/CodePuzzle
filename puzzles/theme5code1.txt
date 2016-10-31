@@ -1,0 +1,8 @@
+program while1;
+var
+A, B: integer;
+begin
+readln(A,B);
+while (A - B) >=  0 do A := A - B;
+write(A);
+end.

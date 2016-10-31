@@ -1,0 +1,16 @@
+uses crt;
+Var x,xn,xk,dx,y:real;
+begin
+clrscr;
+xn:=0.5;
+xk:=1.5;
+dx:=0.1;
+x:=xn-dx;
+while x<=xk do
+begin
+x:=x+dx;
+y:=ln(x)-x*x;
+writeln('x=',x:4:1,'    y=',y:8:4);
+end;
+readln
+end.

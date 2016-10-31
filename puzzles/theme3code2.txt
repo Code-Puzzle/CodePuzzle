@@ -1,10 +1,26 @@
-program if30;
-var
-a: integer;
+program gcase;
+uses crt;
+var 
+a,b,x,y :real;
+n :integer;
 begin
-write('Введите число: ');
-read(a);
-if Odd(a) then write('Нечетное ') else write('Четное ');
-if a >= 100 then write('трехзначное число') else
-if a < 10 then write('однозначное число') else write('двухзначное число');
+clrscr;
+a:=2.8; b:=5.1E-2;
+writeln('Результат':20);
+writeln('n':3,'x':10,'y':15);
+x:=0;
+repeat
+n:=trunc(10*x+1);
+write(n:3);
+case n of
+1:y:=1+exp(a*x);
+2:y:=a+ln(a+b);
+3:y:=b*sqr(x);
+4:y:=a-sqrt(abs(a*b/2));
+5:y:=1+a*b*x;
+end;
+writeln(' ':10,x:5:3,' ':5,y:9);
+x:=x+0.05;
+until x>=0.5;
+Readln;
 end.

@@ -1,4 +1,5 @@
 import random
+from sys import exit
 
 import cocos
 from cocos.director import director
@@ -27,7 +28,6 @@ class DragDropStrings(cocos.layer.Layer):
         self.background = background
         self.add(self.background)
         # Перемешиваем строки и добавляем их к слою для отрисовки. Также добавляем позиции
-        # TODO: Хардкод! Позиционировать строчки кода относительно игрового экрана
         i = 0
         strings = random.sample(strings, len(strings))
         for string in strings:
@@ -41,7 +41,6 @@ class DragDropStrings(cocos.layer.Layer):
         for pos in self.positions:
             self.add(pos, z=0)
         # Добавляем строку, сообщающую о выигрыше, в спрятанном состоянии
-        # TODO: Переделать сообщение о победе во что-то няшное
         self.winning_line = cocos.text.Label("Поздравляю! Ты собрал правильный код!", (WIDTH/2 - 100, 100))
         self.winning_line.do(Hide())
         self.add(self.winning_line)
@@ -77,7 +76,6 @@ class RectWithText(cocos.layer.Layer):
     """ RectWithText - слой, который содержит строчку собираемого кода, и всё для работы с ней.
         Является обработчиком событий
     """
-    # TODO: запилить методы, которые буду управлять состояниями строки(находится/не находится в позиции и т д)
 
     is_event_handler = True
 
@@ -92,8 +90,8 @@ class RectWithText(cocos.layer.Layer):
         self.startx = x  # x координата стартовой позиции. Для возвращения строки на исходное место
         self.starty = y  # y координата стартовой позиции. Для возвращения строки на исходное место
 
-        self.w = len(text)*10  # Длина прямоугольника со строкой. TODO: Хардкод! Более точно считать размер строки
-        self.h = 18  # Высота прямоугольника со строкой. TODO: Хардкод! Переделать, если будет изменяться шрифт
+        self.w = len(text)*10  # Длина прямоугольника со строкой.
+        self.h = 18  # Высота прямоугольника со строкой.
 
         self.line = text  # Строковое значение - одна из строк кода. Используется для записи в соотв. поле позиции
         self.in_position = None  # ссылка на объект позиции (RectPosition) в которой находится строка
@@ -117,7 +115,6 @@ class RectWithText(cocos.layer.Layer):
             posx2 = self.x + self.w
             posy2 = self.y + self.h
             if (x >= posx) and (y >= posy) and (x <= posx2) and (y <= posy2) and not(self.are_actions_running()):
-                # TODO: что-то сделать с этим хаком
                 # Тут для того, чтобы поменять z-уровень строки, она удаляется из списка, а потом добавляется заново
                 self.is_dragged = True
                 # hack:
@@ -149,7 +146,6 @@ class RectWithText(cocos.layer.Layer):
                     pos.occupying_line = self.line
                     self.in_position = pos
                 else:  # если не попала - возвращаем строку на исходную
-                    # TODO: сделать так, чтобы если строка была в какой-то позиции, она возвращалась на неё
                     self.is_dragged = False
                     self.do(MoveTo((self.startx, self.starty), 0.25))
                     self.parent.dragged_line = None
@@ -157,7 +153,6 @@ class RectWithText(cocos.layer.Layer):
                         self.in_position.is_occupied = False
                         self.in_position.occupying_line = ""
                         self.in_position = None
-        #  TODO: Заглушка! Возможно надо куда-нибудь это убрать - сделать обработчик события победы
         if self.parent.goal():  # проверяем, не достигнута ли цель
             self.parent.winning_line.do(Show())
             self.parent.parent.next_button.is_active = True
@@ -254,11 +249,25 @@ class Button(cocos.layer.Layer):
                 self.rectangle.layer_color = self.color
 
 
+class StartPicture(cocos.layer.Layer):
+
+    is_event_handler = True
+
+    def __init__(self):
+        """ Конструктор"""
+        super(StartPicture, self).__init__()
+        self.picture = cocos.sprite.Sprite(image='data/start.jpg', position=(WIDTH / 2, HEIGHT / 2))
+        self.add(self.picture)
+
+    def on_mouse_release(self, x, y, buttons, modifiers):
+        global scene_main_menu
+        director.run(scene_main_menu)  # запускаем сцену главного меню
+
+
 class RectPosition(cocos.layer.Layer):
     """ RectPosition - слой, который содержит позицию, в которой может находится строчка кода, и всё для работы с ней.
         Является обработчиком событий
     """
-    # TODO: запилить методы, которые буду управлять состояниями позиции (в неё попала строка, очистить позицию и т д)
 
     is_event_handler = True
 
@@ -271,8 +280,8 @@ class RectPosition(cocos.layer.Layer):
 
         self.x = x  # x - координата
         self.y = y  # y - координата
-        self.w = 250  # ширина позиции TODO: Хардкод! Сделать ширину равной самой длинной строке исходного кода
-        self.h = 18  # высота позиции TODO: Хардкод! Если будет меняться размер шрифта, нужно будет менять
+        self.w = 250  # ширина позиции
+        self.h = 18  # высота позиции
 
         self.rectangle = Rectangle((1, 0.2, 0.2, 1), 0, 0, self.w, self.h)  # закрашений прямоугольник (Rectangle)
 
@@ -300,7 +309,6 @@ class RectPosition(cocos.layer.Layer):
         buttons - нажатые кнопки. Опытным путем установлено: 1 - левая, 4 - правая, 2 - средняя
         """
         self.rectangle.layer_color = (1, 0.2, 0.2, 1)  # меняем цвет на красный в любом случае при отпускании мыши
-        # TODO: убрать функционал в метод заполнения/очищения позиции. Сделать, чтобы цвет менялся для заполненной
 
 
 class Rectangle(cocos.layer.Layer):
@@ -332,6 +340,16 @@ class Rectangle(cocos.layer.Layer):
         gl.glVertex2f(w, y)
         gl.glEnd()
         gl.glColor4f(1, 1, 1, 1)
+
+
+class SceneStart(cocos.scene.Scene):
+    """ Сцена, которая показывает картинку при запуске
+            Является обработчиком событий
+    """
+
+    def __init__(self):
+        super(SceneStart, self).__init__()
+        self.add(StartPicture())
 
 
 class SceneTheory(cocos.scene.Scene):
@@ -439,18 +457,35 @@ class ThemesMenu(cocos.menu.Menu):
         self.menu_halign = cocos.menu.CENTER
         menu_items = []
         if progress >= 0:
-            menu_items.append(cocos.menu.MenuItem("Общий вид программ на Паскале", self.on_theme, 1))
+            menu_items.append(cocos.menu.MenuItem("Линейные программы", self.on_theme, 1))
         if progress >= 1:
-            menu_items.append(cocos.menu.MenuItem("Линейные программы", self.on_theme, 2))
+            menu_items.append(cocos.menu.MenuItem("Условный переход", self.on_theme, 2))
         if progress >= 2:
-            menu_items.append(cocos.menu.MenuItem("Условный переход", self.on_theme, 3))
+            menu_items.append(cocos.menu.MenuItem("Оператор CASE", self.on_theme, 3))
+        if progress >= 3:
+            menu_items.append(cocos.menu.MenuItem("Цикл FOR", self.on_theme, 4))
+        if progress >= 4:
+            menu_items.append(cocos.menu.MenuItem("Цикл WHILE", self.on_theme, 5))
+        if progress >= 5:
+            menu_items.append(cocos.menu.MenuItem("Табулирование", self.on_theme, 6))
+        if progress >= 6:
+            menu_items.append(cocos.menu.MenuItem("Массивы", self.on_theme, 7))
+        if progress >= 7:
+            menu_items.append(cocos.menu.MenuItem("Сортировка массивов", self.on_theme, 8))
         menu_items.append(cocos.menu.MenuItem("Назад", self.on_back))
         self.create_menu(menu_items)
 
     def on_theme(self, theme):
         global background
         if theme == 1:
-            sc1 = SceneTheory('data/theme1pic1.jpg', 1, 'themes_menu', 'themes_menu')
+            sc1 = SceneTheory('data/theme1pic1.jpg', 0, 'themes_menu')
+            sc2 = SceneCode('puzzles/theme1code1.txt', 'puzzles/theme1task1.txt', 0)
+            sc3 = SceneCode('puzzles/theme1code2.txt', 'puzzles/theme1task2.txt', 1)
+            sc1.next_scene = sc2
+            sc2.prev_scene = sc1
+            sc2.next_scene = sc3
+            sc3.prev_scene = sc2
+            sc3.next_scene = 'themes_menu'
             director.run(sc1)
         if theme == 2:
             sc1 = SceneTheory('data/theme2pic1.jpg', 0, 'themes_menu')
@@ -472,6 +507,56 @@ class ThemesMenu(cocos.menu.Menu):
             sc3.prev_scene = sc2
             sc3.next_scene = 'themes_menu'
             director.run(sc1)
+        if theme == 4:
+            sc1 = SceneTheory('data/theme4pic1.jpg', 0, 'themes_menu')
+            sc2 = SceneCode('puzzles/theme4code1.txt', 'puzzles/theme4task1.txt', 0)
+            sc3 = SceneCode('puzzles/theme4code2.txt', 'puzzles/theme4task2.txt', 0)
+            sc4 = SceneCode('puzzles/theme4code3.txt', 'puzzles/theme4task3.txt', 4)
+            sc1.next_scene = sc2
+            sc2.prev_scene = sc1
+            sc2.next_scene = sc3
+            sc3.prev_scene = sc2
+            sc3.next_scene = sc4
+            sc4.prev_scene = sc3
+            sc4.next_scene = 'themes_menu'
+            director.run(sc1)
+        if theme == 5:
+            sc1 = SceneTheory('data/theme5pic1.jpg', 0, 'themes_menu')
+            sc2 = SceneCode('puzzles/theme5code1.txt', 'puzzles/theme5task1.txt', 0)
+            sc3 = SceneCode('puzzles/theme5code2.txt', 'puzzles/theme5task2.txt', 5)
+            sc1.next_scene = sc2
+            sc2.prev_scene = sc1
+            sc2.next_scene = sc3
+            sc3.prev_scene = sc2
+            sc3.next_scene = 'themes_menu'
+            director.run(sc1)
+        if theme == 6:
+            sc1 = SceneTheory('data/theme6pic1.jpg', 0, 'themes_menu')
+            sc2 = SceneCode('puzzles/theme6code1.txt', 'puzzles/theme6task1.txt', 0)
+            sc3 = SceneCode('puzzles/theme6code2.txt', 'puzzles/theme6task2.txt', 6)
+            sc1.next_scene = sc2
+            sc2.prev_scene = sc1
+            sc2.next_scene = sc3
+            sc3.prev_scene = sc2
+            sc3.next_scene = 'themes_menu'
+            director.run(sc1)
+        if theme == 7:
+            sc1 = SceneTheory('data/theme7pic1.jpg', 0, 'themes_menu')
+            sc2 = SceneCode('puzzles/theme7code1.txt', 'puzzles/theme7task1.txt', 0)
+            sc3 = SceneCode('puzzles/theme7code2.txt', 'puzzles/theme7task2.txt', 7)
+            sc1.next_scene = sc2
+            sc2.prev_scene = sc1
+            sc2.next_scene = sc3
+            sc3.prev_scene = sc2
+            sc3.next_scene = 'themes_menu'
+            director.run(sc1)
+        if theme == 8:
+            sc1 = SceneTheory('data/theme8pic1.jpg', 0, 'themes_menu')
+            sc2 = SceneCode('puzzles/theme8code1.txt', 'puzzles/theme8task1.txt', 8)
+            sc1.next_scene = sc2
+            sc2.prev_scene = sc1
+            sc2.next_scene = 'themes_menu'
+            director.run(sc1)
 
     def on_back(self):
         global scene_main_menu
@@ -482,10 +567,6 @@ class ThemesMenu(cocos.menu.Menu):
         open('progress', 'w').write(str(progress))
         exit()
 
-# Сначала запишем все сцены в нужном порядке по разделам в cocos.scene.sequence, и будем идти через них с помощью
-# director.pop(), по пути записывая прогресс
-# еще нужно сделать сцену (слой?) с картинкой и кнопками Назад Далее
-
 # Тут начинается выполнение программы
 try:
     progress = int(open('progress', 'r').read())
@@ -493,5 +574,6 @@ except FileNotFoundError:
     progress = 0
 director.init(width=1024, height=768, caption="Code Puzzle", fullscreen=False)  # инициализация окна игры
 background = cocos.sprite.Sprite(image='code-1024x768.jpg', position=(WIDTH/2, HEIGHT/2))
+scene_start = SceneStart()
 scene_main_menu = cocos.scene.Scene(background, MainMenu())
-director.run(scene_main_menu)  # запускаем сцену
+director.run(scene_start)  # запускаем сцену

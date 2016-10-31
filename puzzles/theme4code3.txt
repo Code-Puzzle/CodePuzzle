@@ -1,0 +1,10 @@
+program for9;
+var
+A, B, i, S: integer;
+begin
+read(A, B);
+S := 0;
+for i := A to B do S := S + Sqr(i);
+writeln;
+write( 'Сумма квадратов - ', S);
+end.

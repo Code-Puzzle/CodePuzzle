@@ -1,0 +1,31 @@
+const n = 10;
+var
+arr: array[1..n] of byte;
+i,j,k: byte;
+begin
+randomize;
+write('Original array: ':18);
+for i:=1 to n do begin
+arr[i] := random(256);
+write(arr[i]:4);
+end;
+writeln;
+for i:=1 to 4 do
+for j:=1 to 4-i do
+if arr[j] > arr[j+1] then begin
+k := arr[j];
+arr[j] := arr[j+1];
+arr[j+1] := k
+end;
+for i:=1 to 4 do
+for j:=1 to 4-i do
+if arr[j+6] < arr[j+7] then begin
+k := arr[j+6];
+arr[j+6] := arr[j+7];
+arr[j+7] := k
+end;
+write('Sorted array: ':18);
+for i:=1 to n do
+write(arr[i]:4);
+readln;
+end.

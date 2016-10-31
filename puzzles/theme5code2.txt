@@ -1,0 +1,8 @@
+program while4;
+var
+N: integer;
+begin
+readln(N);
+while N mod 3 = 0 do N := N div 3;
+writeln(N = 1);
+end.

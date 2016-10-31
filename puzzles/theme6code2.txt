@@ -1,0 +1,16 @@
+program abc;
+uses crt;
+var x,y:integer;
+begin
+clrscr;
+x:=1;
+writeln('|-----|-----|');
+writeln('|  X  |  Y  |');
+writeln('|-----|-----|');
+while x<=20 do
+begin
+y:=5*x-2;
+writeln('|','  ',x,'  |  ',y,'  |');
+x:=x+2;
+end;
+end.

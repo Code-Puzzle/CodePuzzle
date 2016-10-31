@@ -1,0 +1,7 @@
+program for1;
+var
+K, N, i: integer;
+begin
+read(K, N);
+for i := 1 to N do write(K, ' ');
+end.

@@ -1,0 +1,8 @@
+Program Hello_boy_girl;
+var 
+name: string;
+Begin
+Write('Введите свое имя: ');
+Read(name);
+Write('Привет,',name,'!');
+End.

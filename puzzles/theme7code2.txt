@@ -1,0 +1,19 @@
+const N = 10;
+var
+arr: array[1..N] of byte;
+i, k: byte;
+begin
+randomize;
+for i:=1 to N do begin
+arr[i] := random(80);
+write(arr[i]:3);
+end;
+writeln;
+for i:=1 to N-1 do 
+for k:=i+1 to N do 
+if arr[i] = arr[k] then begin
+writeln('Есть одинаковые элементы');
+exit;
+end;
+writeln('Все элементы уникальны');
+end.

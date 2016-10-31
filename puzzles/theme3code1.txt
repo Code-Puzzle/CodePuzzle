@@ -1,14 +1,24 @@
-program if5;
-var
-a, b, c, plus, minus: integer;
-begin
-write('Введите три целых числа: ');
-read(a, b, c);
-plus := 0;
-minus := 0;
-if a > 0 then Inc(plus) else Inc(minus);
-if b > 0 then Inc(plus) else Inc(minus);
-if c > 0 then Inc(plus) else Inc(minus);
-writeln('Количество положительных чисел - ', plus);
-writeln('Количество отрицательных чисел - ', minus);
-end.
+Program Number1;
+Var
+a : integer; 
+Begin
+writeln('Введите цифру '); 
+readln(a);
+if (a<0) or (a>9)
+then
+writeln ('Это число не является цифрой')
+else
+case a of
+0 : writeln ('ноль');
+1 : writeln ('один');
+2 : writeln ('два');
+3 : writeln ('три');
+4 : writeln ('четыре');
+5 : writeln ('пять');
+6 : writeln ('шесть');
+7 : writeln ('семь');
+8 : writeln ('восемь');
+9 : writeln ('девять');
+end;
+readln;
+End.

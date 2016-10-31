@@ -1,0 +1,10 @@
+program for2;
+var
+A, B, i, count: integer;
+begin
+read(A, B);
+for i := A to B do write(i, ' ');
+count := B - A + 1;
+writeln;
+write( 'Количество чисел - ', count);
+end.
